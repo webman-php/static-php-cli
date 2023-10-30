@@ -11,7 +11,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  build:
+  integration:
     name: build ${{ inputs.version }} on Linux x86_64
     runs-on: ubuntu-latest
     strategy:
