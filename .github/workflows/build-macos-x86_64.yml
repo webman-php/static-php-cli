@@ -3,6 +3,12 @@ name: CI on x86_64 macOS
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - ".github/workflows/**.yml"
+
 jobs:
   build:
     name: build ${{ matrix.php-versions }} on macOS x86_64
