@@ -47,17 +47,17 @@ jobs:
 
       - name: Pack PHP ${{ matrix.php-versions }} to archive
         run: |
-          cd buildroot/bin/
-          tar -zcvf "php-${{ matrix.php-versions }}-static-bin-linux_aarch64.tar.gz" ./php && rm ./php
+          cd buildroot/bin
+          tar -zcvf "php-${{ matrix.php-versions }}-static-bin-linux_x86_64.tar.gz" ./php && rm ./php && mv "php-${{ matrix.php-versions }}-static-bin-linux_x86_64.tar.gz" ../../tmp/
           if [ -f "./micro.sfx" ]; then
-            tar -zcvf "micro-${{ matrix.php-versions }}-bin-linux_aarch64.tar.gz" ./micro.sfx && rm ./micro.sfx
+            tar -zcvf "micro-${{ matrix.php-versions }}-bin-linux_x86_64.tar.gz" ./micro.sfx && rm ./micro.sfx && mv "micro-${{ matrix.php-versions }}-bin-linux_x86_64.tar.gz" ../../tmp/
           fi
       - name: Deploy to Server
         uses: easingthemes/ssh-deploy@v4.1.8
         env:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
           ARGS: "-rltgoDzvO"
-          SOURCE: "buildroot/bin/"
+          SOURCE: "tmp/"
           REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
           REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
@@ -65,6 +65,3 @@ jobs:
       - name: Deploy
         run: |
           curl ${{ secrets.DEPLOY_URL }}
-      - name: Remove dist directory
-        run: |
-          rm -rf buildroot/bin/
