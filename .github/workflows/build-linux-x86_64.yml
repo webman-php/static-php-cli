@@ -1,8 +1,9 @@
 name: CI on x86_64 linux
 
 on:
-    push:
-        branches: [ master ]
+ push:
+   branches: [ master ]
+ workflow_dispatch:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
