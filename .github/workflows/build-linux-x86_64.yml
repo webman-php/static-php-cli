@@ -4,6 +4,9 @@ on:
  push:
    branches: [ master ]
  workflow_dispatch:
+ 
+permissions:
+  contents: write
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -52,9 +55,6 @@ jobs:
         with:
           name: micro-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
           path: buildroot/bin/micro.sfx
-
-      - name: Set permissions for target folder
-        run: chmod -R 777 buildroot/bin
 
       - name: Pack PHP ${{ matrix.php-versions }} to archive
         run: |
