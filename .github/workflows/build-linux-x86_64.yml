@@ -4,9 +4,6 @@ on:
  push:
    branches: [ master ]
  workflow_dispatch:
- 
-permissions:
-  contents: write
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -17,9 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: [ "8.0", "8.1", "8.2" ]
+        php-versions: [ "8.0" ]
     steps:
       - uses: actions/checkout@v3
+
+      - name: mkdir
+        run: mkdir buildroot/bin/php && chmod 777 buildroot/bin/php
 
       # Cache composer dependencies
       - id: cache-composer-deps
@@ -38,6 +38,7 @@ jobs:
         with:
           path: downloads
           key: php-${{ inputs.version }}-dependencies
+          
 
       # If there's no dependencies cache, fetch sources, with or without debug
       - if: steps.cache-download.outputs.cache-hit != 'true'
