@@ -4,10 +4,9 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 on:
-  push:
-    branches: [ master ]
-    paths:
-      - ".github/workflows/**.yml"
+ push:
+   branches: [ master ]
+ workflow_dispatch:
 
 jobs:
   build:
