@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/**.yml"
 
+      
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
