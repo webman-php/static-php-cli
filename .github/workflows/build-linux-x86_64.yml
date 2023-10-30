@@ -53,6 +53,8 @@ jobs:
           name: micro-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
           path: buildroot/bin/micro.sfx
 
+      - name: Set permissions for target folder
+        run: chmod -R 777 buildroot/bin
 
       - name: Pack PHP ${{ matrix.php-versions }} to archive
         run: |
