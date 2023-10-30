@@ -27,7 +27,7 @@ jobs:
 
       # If there's no dependencies cache, fetch sources, with or without debug
       - if: steps.cache-download.outputs.cache-hit != 'true'
-        run: SPC_USE_ARCH=aarch64 ./bin/spc-alpine-docker download --with-php=${{ matrix.php-versions }}
+        run: SPC_USE_ARCH=aarch64 ./bin/spc-alpine-docker download --with-php=${{ matrix.php-versions }} --all
 
 
       - name: Remove tmp directory
