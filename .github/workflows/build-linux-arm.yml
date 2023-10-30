@@ -35,7 +35,7 @@ jobs:
           rm -rf tmp/* && rm -rf buildroot/bin/*
           
       # Run build command
-      - run: SPC_USE_ARCH=aarch64 ./bin/spc-alpine-docker build --build-cli --build-micro "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,filter,fileinfo,gd,iconv,mbstring,mbregex,mysqli,mysqlnd,openssl,opcache,pcntl,pdo,pdo_mysql,pdo_sqlite,pdo_pgsql,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib,mongodb,xlswriter,event,shmop" -I "momory_limit=256M"
+      - run: SPC_USE_ARCH=aarch64 ./bin/spc-alpine-docker build --with-libs=freetype,libjpeg,libavif,libwebp --build-cli --build-micro "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,filter,fileinfo,gd,iconv,mbstring,mbregex,mysqli,mysqlnd,openssl,opcache,pcntl,pdo,pdo_mysql,pdo_sqlite,pdo_pgsql,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib,mongodb,xlswriter,event,shmop" -I "momory_limit=256M"
 
       - uses: actions/upload-artifact@v3
         with:
