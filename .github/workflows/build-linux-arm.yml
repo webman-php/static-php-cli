@@ -3,6 +3,12 @@ name: CI on arm linux
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - ".github/workflows/**.yml"
+
 jobs:
   build:
     name: build ${{ matrix.php-versions }} on aarch64
