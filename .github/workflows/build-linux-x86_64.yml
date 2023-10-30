@@ -1,5 +1,11 @@
 name: CI on x86_64 linux
 
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - ".github/workflows/**.yml"
+
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
