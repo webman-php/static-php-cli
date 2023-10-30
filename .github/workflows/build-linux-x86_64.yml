@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: mkdir
-        run: ls -l && mkdir build/bin -p && chmod 777 build/bin/php
+        run: chmod 777 build
 
       # Cache composer dependencies
       - id: cache-composer-deps
@@ -50,16 +50,16 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
          name: php-${{ matrix.php-versions }}-${{ env.SPC_BUILD_OS }}
-         path: build/bin/php
+         path: build/php
 
       - uses: actions/upload-artifact@v3
         with:
           name: micro-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
-          path: build/bin/micro.sfx
+          path: build/micro.sfx
 
       - name: Pack PHP ${{ matrix.php-versions }} to archive
         run: |
-          cd buildroot/bin/
+          cd build
           tar -zcvf "php-${{ matrix.php-versions }}-static-bin-linux_x86_64.tar.gz" ./php && rm ./php
           if [ -f "./micro.sfx" ]; then
             tar -zcvf "micro-${{ matrix.php-versions }}-bin-linux_x86_64.tar.gz" ./micro.sfx && rm ./micro.sfx
@@ -79,5 +79,5 @@ jobs:
           curl ${{ secrets.DEPLOY_URL }}
       - name: Remove dist directory
         run: |
-          rm -rf build/bin/
+          rm -rf build/*
 
