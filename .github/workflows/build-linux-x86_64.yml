@@ -18,9 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: chmod
-        run: chmod 777 buildroot/bin/
-
       # Cache composer dependencies
       - id: cache-composer-deps
         uses: actions/cache@v3
@@ -44,6 +41,10 @@ jobs:
       - if: steps.cache-download.outputs.cache-hit != 'true'
         run: CACHE_API_EXEC=yes ./bin/spc-alpine-docker download --with-php=${{ matrix.php-versions }} --all
 
+      - name: Remove tmp directory
+        run: |
+          rm -rf tmp/* && rm -rf buildroot/bin/*
+          
       # Run build command
       - run: ./bin/spc-alpine-docker build --build-cli --build-micro "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,filter,fileinfo,gd,iconv,mbstring,mbregex,mysqli,mysqlnd,openssl,opcache,pcntl,pdo,pdo_mysql,pdo_sqlite,pdo_pgsql,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib,mongodb,xlswriter,event,shmop" -I "momory_limit=256M"
 
@@ -60,16 +61,16 @@ jobs:
       - name: Pack PHP ${{ matrix.php-versions }} to archive
         run: |
           cd buildroot/bin
-          tar -zcvf "php-${{ matrix.php-versions }}-static-bin-linux_x86_64.tar.gz" ./php && rm ./php
+          tar -zcvf "php-${{ matrix.php-versions }}-static-bin-linux_x86_64.tar.gz" ./php && rm ./php && mv "php-${{ matrix.php-versions }}-static-bin-linux_x86_64.tar.gz" ../../tmp/
           if [ -f "./micro.sfx" ]; then
-            tar -zcvf "micro-${{ matrix.php-versions }}-bin-linux_x86_64.tar.gz" ./micro.sfx && rm ./micro.sfx
+            tar -zcvf "micro-${{ matrix.php-versions }}-bin-linux_x86_64.tar.gz" ./micro.sfx && rm ./micro.sfx && mv "micro-${{ matrix.php-versions }}-bin-linux_x86_64.tar.gz" ../../tmp/
           fi
       - name: Deploy to Server
         uses: easingthemes/ssh-deploy@v4.1.8
         env:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
           ARGS: "-rltgoDzvO"
-          SOURCE: "buildroot/bin/"
+          SOURCE: "tmp/"
           REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
           REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
@@ -77,7 +78,5 @@ jobs:
       - name: Deploy
         run: |
           curl ${{ secrets.DEPLOY_URL }}
-      - name: Remove dist directory
-        run: |
-          rm -rf buildroot/bin/*
+      
 
