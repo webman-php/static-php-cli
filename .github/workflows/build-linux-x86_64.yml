@@ -39,7 +39,8 @@ jobs:
 
       # If there's no dependencies cache, fetch sources, with or without debug
       #- if: steps.cache-download.outputs.cache-hit != 'true'
-        run: CACHE_API_EXEC=yes ./bin/spc-alpine-docker download --with-php=${{ matrix.php-versions }} --all
+      - name: Download PHP ${{ matrix.php-versions }}
+        run: ./bin/spc-alpine-docker download --with-php=${{ matrix.php-versions }} --all
 
       - name: Remove tmp directory
         run: |
