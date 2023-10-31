@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: [ "8.0", "8.1", "8.2" ]
+        php-versions: [ "8.0", "8.1" ]
     steps:
       - uses: actions/checkout@v3
 
@@ -38,7 +38,7 @@ jobs:
           
 
       # If there's no dependencies cache, fetch sources, with or without debug
-      - if: steps.cache-download.outputs.cache-hit != 'true'
+      #- if: steps.cache-download.outputs.cache-hit != 'true'
         run: CACHE_API_EXEC=yes ./bin/spc-alpine-docker download --with-php=${{ matrix.php-versions }} --all
 
       - name: Remove tmp directory
@@ -61,6 +61,7 @@ jobs:
       - name: Pack PHP ${{ matrix.php-versions }} to archive
         run: |
           cd buildroot/bin
+          ./php -v
           tar -zcvf "php-${{ matrix.php-versions }}-static-bin-linux_x86_64.tar.gz" ./php && rm ./php && mv "php-${{ matrix.php-versions }}-static-bin-linux_x86_64.tar.gz" ../../tmp/
           if [ -f "./micro.sfx" ]; then
             tar -zcvf "micro-${{ matrix.php-versions }}-bin-linux_x86_64.tar.gz" ./micro.sfx && rm ./micro.sfx && mv "micro-${{ matrix.php-versions }}-bin-linux_x86_64.tar.gz" ../../tmp/
