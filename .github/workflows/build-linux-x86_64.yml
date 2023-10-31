@@ -1,20 +1,42 @@
 name: CI on x86_64 linux
 
 on:
- push:
-   branches: [ master ]
- workflow_dispatch:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        description: php version to compile
+        default: '8.2'
+        type: choice
+        options:
+          - '8.2'
+          - '8.1'
+          - '8.0'
+          - '7.4'
+      build-cli:
+        description: build cli binary
+        default: true
+        type: boolean
+      build-micro:
+        description: build phpmicro binary
+        type: boolean
+      build-fpm:
+        description: build fpm binary
+        type: boolean
+      extensions:
+        description: extensions to compile (comma separated)
+        required: true
+        type: string
+      debug:
+        type: boolean
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  integration:
+  build:
     name: build ${{ inputs.version }} on Linux x86_64
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-versions: [ "8.0", "8.1" ]
     steps:
       - uses: actions/checkout@v3
 
@@ -35,38 +57,66 @@ jobs:
         with:
           path: downloads
           key: php-${{ inputs.version }}-dependencies
-          
+
+      # With or without debug
+      - if: inputs.debug == true
+        run: echo "SPC_BUILD_DEBUG=--debug" >> $GITHUB_ENV
+
+      # With target select: cli, micro or both
+      - if: ${{ inputs.build-cli == true }}
+        run: echo "SPC_BUILD_CLI=--build-cli" >> $GITHUB_ENV
+      - if: ${{ inputs.build-micro == true }}
+        run: echo "SPC_BUILD_MICRO=--build-micro" >> $GITHUB_ENV
+      - if: ${{ inputs.build-fpm == true }}
+        run: echo "SPC_BUILD_FPM=--build-fpm" >> $GITHUB_ENV
 
       # If there's no dependencies cache, fetch sources, with or without debug
-      #- if: steps.cache-download.outputs.cache-hit != 'true'
+      - if: steps.cache-download.outputs.cache-hit != 'true'
+        run: CACHE_API_EXEC=yes ./bin/spc-alpine-docker download --with-php=${{ inputs.version }} --all ${{ env.SPC_BUILD_DEBUG }}
 
-      - name: Download PHP ${{ matrix.php-versions }}
-        run: ./bin/spc-alpine-docker download --with-php=${{ matrix.php-versions }} --all
-
-      - name: Remove tmp directory
-        run: |
-          rm -rf tmp/* && rm -rf buildroot/bin/*
-          
       # Run build command
-      - run: ./bin/spc-alpine-docker build --with-libs=freetype,libjpeg,libavif,libwebp --build-cli --build-micro "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,filter,fileinfo,gd,iconv,mbstring,mbregex,mysqli,mysqlnd,openssl,opcache,pcntl,pdo,pdo_mysql,pdo_sqlite,pdo_pgsql,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib,mongodb,xlswriter,event,shmop" -I "momory_limit=256M"
+      - run: ./bin/spc-alpine-docker build ${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
 
-      - uses: actions/upload-artifact@v3
+      # Upload cli executable
+      - if: ${{ inputs.build-cli == true }}
+        uses: actions/upload-artifact@v3
         with:
-         name: php-${{ matrix.php-versions }}-${{ env.SPC_BUILD_OS }}
-         path: buildroot/bin/php
+          name: php-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
+          path: buildroot/bin/php
 
-      - uses: actions/upload-artifact@v3
+      # Upload micro self-extracted executable
+      - if: ${{ inputs.build-micro == true }}
+        uses: actions/upload-artifact@v3
         with:
           name: micro-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
           path: buildroot/bin/micro.sfx
 
-      - name: Pack PHP ${{ matrix.php-versions }} to archive
+      # Upload fpm executable
+      - if: ${{ inputs.build-fpm == true }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: php-fpm-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
+          path: buildroot/bin/php-fpm
+
+      # Upload extensions metadata
+      - uses: actions/upload-artifact@v3
+        with:
+          name: license-files
+          path: buildroot/license/
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build-meta
+          path: |
+            buildroot/build-extensions.json
+            buildroot/build-libraries.json
+
+      - name: Pack PHP ${{ inputs.version }} to archive
         run: |
           cd buildroot/bin
           ./php -v
-          tar -zcvf "php-${{ matrix.php-versions }}-static-bin-linux_x86_64.tar.gz" ./php && rm ./php && mv "php-${{ matrix.php-versions }}-static-bin-linux_x86_64.tar.gz" ../../tmp/
+          tar -zcvf "php-${{ inputs.version }}-static-bin-linux_x86_64.tar.gz" ./php && rm ./php && mv "php-${{ inputs.version }}-static-bin-linux_x86_64.tar.gz" ../../tmp/
           if [ -f "./micro.sfx" ]; then
-            tar -zcvf "micro-${{ matrix.php-versions }}-bin-linux_x86_64.tar.gz" ./micro.sfx && rm ./micro.sfx && mv "micro-${{ matrix.php-versions }}-bin-linux_x86_64.tar.gz" ../../tmp/
+            tar -zcvf "micro-${{ inputs.version }}-bin-linux_x86_64.tar.gz" ./micro.sfx && rm ./micro.sfx && mv "micro-${{ inputs.version }}-bin-linux_x86_64.tar.gz" ../../tmp/
           fi
       - name: Deploy to Server
         uses: easingthemes/ssh-deploy@v4.1.8
