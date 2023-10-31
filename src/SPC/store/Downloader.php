@@ -357,6 +357,8 @@ class Downloader
         $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
 
         $cmd = "curl -sfSL {$methodArg} {$headerArg} \"{$url}\"";
+
+        echo $cmd,"\n";
         if (getenv('CACHE_API_EXEC') === 'yes') {
             if (!file_exists(DOWNLOAD_PATH . '/.curl_exec_cache')) {
                 $cache = [];
