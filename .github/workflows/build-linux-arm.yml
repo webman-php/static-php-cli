@@ -103,6 +103,22 @@ jobs:
           name: php-${{ inputs.version }}-linux-${{ inputs.operating-system }}
           path: buildroot/bin/php
 
+      # Pack PHP to archive 
+      - if: ${{ inputs.build-cli == true }}
+        run: mkdir dist && cp buildroot/bin/php dist/ && cd dist && tar -zcvf "php-${{ inputs.version }}-${{ inputs.operating-system }}.tar.gz" ./php
+        
+      # Deploy to Zhamao Server
+      - if: ${{ inputs.build-cli == true }}
+        uses: easingthemes/ssh-deploy@v4.1.8
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
+          ARGS: "-rltgoDzvO"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
+
       # Upload micro self-extracted executable
       - if: ${{ inputs.build-micro == true }}
         uses: actions/upload-artifact@v4
