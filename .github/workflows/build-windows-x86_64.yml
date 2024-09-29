@@ -53,11 +53,11 @@ jobs:
           path: vendor
           key: composer-dependencies
 
-       # name: Set default extensions
+      # name: Set default extensions
       - if: inputs.build-cli == true && inputs.extensions == '' && inputs.allextensions == true
-        run: echo "extensions=amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,exif,ffi,fileinfo,filter,gd,gmssl,iconv,igbinary,libxml,mbregex,mbstring,msgpack,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,redis,session,shmop,simplexml,soap,sockets,sqlite3,sqlsrv,sysvshm,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $inputs:GITHUB_ENV
+        run: echo "extensions=amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,exif,ffi,fileinfo,filter,gd,gmssl,iconv,igbinary,libxml,mbregex,mbstring,msgpack,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,redis,session,shmop,simplexml,soap,sockets,sqlite3,sqlsrv,sysvshm,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
       - if: inputs.build-cli == true && inputs.extensions == '' && inputs.allextensions == false
-        run: echo "extensions=bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,gd,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,phar,redis,session,simplexml,soap,sockets,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $inputs:GITHUB_ENV
+        run: echo "extensions=bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,gd,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,phar,redis,session,simplexml,soap,sockets,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
 
 
       # If there's no Composer cache, install dependencies
@@ -67,7 +67,7 @@ jobs:
       - name: Generate hashed key for download cache
         shell: bash
         run: |
-          INPUT_HASH=$(echo "${{ runner.os }}-${{ inputs.version }}-${{ inputs.extensions }}" | sha256sum | awk '{print $1}')
+          INPUT_HASH=$(echo "${{ runner.os }}-${{ inputs.version }}-${{ env.extensions }}" | sha256sum | awk '{print $1}')
           echo "INPUT_HASH=${INPUT_HASH}" >> "$GITHUB_ENV"
 
       # Cache downloaded source
@@ -93,10 +93,10 @@ jobs:
 
       # If there's no dependencies cache, fetch sources, with or without debug
       - if: steps.cache-download.outputs.cache-hit != 'true'
-        run: ./bin/spc download --with-php="${{ inputs.version }}" --for-extensions="${{ inputs.extensions }}" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
+        run: ./bin/spc download --with-php="${{ inputs.version }}" --for-extensions="${{ env.extensions }}" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
 
       # Run build command
-      - run: ./bin/spc build "${{ inputs.extensions }}" --with-libs="freetype,libavif,libjpeg,libwebp" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
+      - run: ./bin/spc build "${{ env.extensions }}" --with-libs="freetype,libavif,libjpeg,libwebp" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
 
       # Upload cli executable
       - if: ${{ inputs.build-cli == true }}
