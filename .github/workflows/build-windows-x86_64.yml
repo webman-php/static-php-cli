@@ -14,10 +14,6 @@ on:
           - '8.1'
           - '8.0'
           - '7.4'
-      allextensions:
-        description: all extenstions
-        default: true
-        type: boolean
       build-cli:
         description: build cli binary
         default: true
@@ -25,9 +21,6 @@ on:
       build-micro:
         description: build phpmicro binary
         type: boolean
-      extensions:
-        description: extensions to compile (comma separated)
-        type: string
       prefer-pre-built:
         description: prefer pre-built binaries (reduce build time)
         type: boolean
@@ -53,15 +46,12 @@ jobs:
           path: vendor
           key: composer-dependencies
 
-      # name: Set default extensions
-      - if: inputs.extensions != ''
-        run: echo "extensions=${{ inputs.extensions }}" >> $env:GITHUB_ENV
-      - if: inputs.build-cli == true && inputs.extensions == '' && inputs.allextensions == true
-        run: echo "extensions=amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,exif,ffi,fileinfo,filter,gd,gmssl,iconv,igbinary,libxml,mbregex,mbstring,msgpack,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,redis,session,shmop,simplexml,soap,sockets,sqlite3,sqlsrv,sysvshm,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
-      - if: inputs.build-cli == true && inputs.extensions == '' && inputs.allextensions == false
-        run: echo "extensions=bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,gd,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,phar,redis,session,simplexml,soap,sockets,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
+      # name: Set all extensions
+      - run: echo "extensions-all=amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,exif,ffi,fileinfo,filter,gd,gmssl,iconv,igbinary,libxml,mbregex,mbstring,msgpack,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,redis,session,shmop,simplexml,soap,sockets,sqlite3,sqlsrv,sysvshm,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
 
-
+      # name: Set part extensions
+      - run: echo "extensions=bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,gd,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,phar,redis,session,simplexml,soap,sockets,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
+      
       # If there's no Composer cache, install dependencies
       - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
         run: composer update --no-dev --classmap-authoritative
@@ -69,7 +59,7 @@ jobs:
       - name: Generate hashed key for download cache
         shell: bash
         run: |
-          INPUT_HASH=$(echo "${{ runner.os }}-${{ inputs.version }}-${{ env.extensions }}" | sha256sum | awk '{print $1}')
+          INPUT_HASH=$(echo "${{ runner.os }}-${{ inputs.version }}-${{ env.extensions-all }}" | sha256sum | awk '{print $1}')
           echo "INPUT_HASH=${INPUT_HASH}" >> "$GITHUB_ENV"
 
       # Cache downloaded source
@@ -95,22 +85,13 @@ jobs:
 
       # If there's no dependencies cache, fetch sources, with or without debug
       - if: steps.cache-download.outputs.cache-hit != 'true'
-        run: ./bin/spc download --with-php="${{ inputs.version }}" --for-extensions="${{ env.extensions }}" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
+        run: ./bin/spc download --with-php="${{ inputs.version }}" --for-extensions="${{ env.extensions-all }}" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
 
       # Run build command
-      - run: ./bin/spc build "${{ env.extensions }}" --with-libs="freetype,libavif,libjpeg,libwebp" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
-
-      # Upload cli executable
-      - if: ${{ inputs.build-cli == true }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: php-${{ inputs.version }}
-          path: buildroot/bin/php.exe
+      - run: ./bin/spc build "${{ env.extensions }}" -I "memory_limit=256M" --with-libs="freetype,libavif,libjpeg,libwebp" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
 
       # Pack PHP to archive 
-      - if: inputs.build-cli == true && inputs.allextensions == true
-        run: mkdir dist2 && cp buildroot/bin/php.exe dist2/ &&  cd dist2 && tar -zcvf "php-${{ inputs.version }}-windows-x86_64-all-extenstions.tar.gz" ./php.exe && rm ./php.exe
-      - if: inputs.build-cli == true && inputs.allextensions == false
+      - if: inputs.build-cli == true 
         run: mkdir dist2 && cp buildroot/bin/php.exe dist2/ &&  cd dist2 && tar -zcvf "php-${{ inputs.version }}-windows-x86_64.tar.gz" ./php.exe && rm ./php.exe
 
       # Upload tar
@@ -119,22 +100,18 @@ jobs:
         with:
           name: php-${{ inputs.version }}
           path: dist2
-        
-      # Upload micro self-extracted executable
-      - if: ${{ inputs.build-micro == true }}
+
+       # Run build command
+      - run: ./bin/spc build "${{ env.extensions-all }}" -I "memory_limit=256M" --with-libs="freetype,libavif,libjpeg,libwebp" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
+
+      # Pack PHP to archive 
+      - if: inputs.build-cli == true
+        run: mkdir dist2 && cp buildroot/bin/php.exe dist2/ &&  cd dist2 && tar -zcvf "php-${{ inputs.version }}-windows-x86_64-all-extenstions.tar.gz" ./php.exe && rm ./php.exe
+
+      # Upload tar
+      - if: ${{ inputs.build-cli == true }}
         uses: actions/upload-artifact@v4
         with:
-          name: micro-${{ inputs.version }}
-          path: buildroot/bin/micro.sfx
-
-      # Upload extensions metadata
-      - uses: actions/upload-artifact@v4
-        with:
-          name: license-files
-          path: buildroot/license/
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build-meta
-          path: |
-            buildroot/build-extensions.json
-            buildroot/build-libraries.json
+          name: php-${{ inputs.version }}
+          path: dist2
+        
