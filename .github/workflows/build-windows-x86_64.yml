@@ -109,9 +109,9 @@ jobs:
 
       # Pack PHP to archive 
       - if: inputs.build-cli == true && inputs.allextensions == true
-        run: cp buildroot/bin/php.exe dist2/ &&  cd dist2 && tar -zcvf "php-${{ inputs.version }}-windows-x86_64-all-extenstions.tar.gz" ./php.exe && rm ./php.exe
+        run: mkdir dist2 && cp buildroot/bin/php.exe dist2/ &&  cd dist2 && tar -zcvf "php-${{ inputs.version }}-windows-x86_64-all-extenstions.tar.gz" ./php.exe && rm ./php.exe
       - if: inputs.build-cli == true && inputs.allextensions == false
-        run: cp buildroot/bin/php.exe dist2/ &&  cd dist2 && tar -zcvf "php-${{ inputs.version }}-windows-x86_64.tar.gz" ./php.exe && rm ./php.exe
+        run: mkdir dist2 && cp buildroot/bin/php.exe dist2/ &&  cd dist2 && tar -zcvf "php-${{ inputs.version }}-windows-x86_64.tar.gz" ./php.exe && rm ./php.exe
         
       # Deploy to Zhamao Server
       - if: ${{ inputs.build-cli == true }}
