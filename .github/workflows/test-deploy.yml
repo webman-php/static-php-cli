@@ -1,0 +1,30 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main  # 或者你想要监控的其他分支
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Create dist2 directory and file
+      run: |
+        mkdir -p dist2
+        echo "This is a test file" > dist2/1.txt
+
+    - name: Deploy to server
+      uses: easingthemes/ssh-deploy@v4.1.8
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
+        ARGS: "-rltgoDzvO"
+        SOURCE: "dist2/"
+        REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+        REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
+        REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
+        TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
