@@ -72,9 +72,9 @@ jobs:
 
       # name: Set default extensions
       - if: inputs.build-cli == true && inputs.extensions == '' && inputs.allextensions == true
-        run: echo "extensions=amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,exif,ffi,fileinfo,filter,gd,gmssl,iconv,igbinary,libxml,mbregex,mbstring,msgpack,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,redis,session,shmop,simplexml,soap,sockets,sqlite3,sqlsrv,sysvshm,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:$GITHUB_ENV
+        run: echo "extensions=amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,exif,ffi,fileinfo,filter,gd,gmssl,iconv,igbinary,libxml,mbregex,mbstring,msgpack,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,redis,session,shmop,simplexml,soap,sockets,sqlite3,sqlsrv,sysvshm,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
       - if: inputs.build-cli == true && inputs.extensions == '' && inputs.allextensions == false
-        run: echo "extensions=bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,gd,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,phar,redis,session,simplexml,soap,sockets,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:$GITHUB_ENV
+        run: echo "extensions=bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,gd,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,phar,redis,session,simplexml,soap,sockets,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
 
       # With or without debug
       - if: inputs.debug == true
