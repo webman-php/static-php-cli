@@ -81,7 +81,7 @@ jobs:
       - if: inputs.extensions != ''
         run: echo "extensions=${{ inputs.extensions }}" >> $env:GITHUB_ENV
       - if: inputs.build-cli == true && env.extensions == '' && inputs.allextensions == true
-        run: echo "extensions=amqp,apcu,bcmath,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,gd,gettext,iconv,igbinary,imagick,libxml,mbregex,mbstring,memcache,mongodb,msgpack,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,phar,posix,readline,redis,session,shmop,simplexml,soap,sockets,sodium,sqlite3,sqlsrv,sysvmsg,sysvsem,sysvshm,tokenizer,xlswriter,xml,xmlreader,xmlwriter,xsl,zip,zlib" >> $GITHUB_ENV
+        run: echo "extensions=amqp,apcu,bcmath,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,gd,gettext,iconv,igbinary,imagick,libxml,mbregex,mbstring,memcached,mongodb,msgpack,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,phar,posix,readline,redis,session,shmop,simplexml,soap,sockets,sodium,sqlite3,sqlsrv,sysvmsg,sysvsem,sysvshm,tokenizer,xlswriter,xml,xmlreader,xmlwriter,xsl,zip,zlib" >> $GITHUB_ENV
       - if: inputs.build-cli == true && env.extensions == '' && inputs.allextensions == false
         run: echo "extensions=apcu,bcmath,calendar,ctype,curl,dba,event,exif,fileinfo,filter,gd,iconv,imagick,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $GITHUB_ENV
 
