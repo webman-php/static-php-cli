@@ -97,7 +97,7 @@ jobs:
 
       # Pack PHP to archive 
       - if: ${{ inputs.build-cli == true }}
-        run: mkdir dist2 && cp buildroot/bin/php.exe dist2/ && cd dist2 && tar -zcvf "php-${{ inputs.version }}-${{ inputs.operating-system }}.tar.gz" ./php.exe
+        run: mkdir dist2 && cp buildroot/bin/php.exe dist2/ && cd dist2 && tar -zcvf "php-${{ inputs.version }}-${{ inputs.operating-system }}.tar.gz" ./php.exe && rm ./php.exe
         
       # Deploy to Zhamao Server
       - if: ${{ inputs.build-cli == true }}
