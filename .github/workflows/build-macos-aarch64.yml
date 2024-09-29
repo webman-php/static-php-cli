@@ -5,7 +5,7 @@ on:
     inputs:
       operating-system:
         required: true
-        description: Compile target x86_64 (Linux only)
+        description: Compile target (Linux only)
         type: choice
         options:
           - aarch64
