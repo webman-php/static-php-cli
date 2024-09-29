@@ -3,6 +3,12 @@ name: CI on arm64 macOS
 on:
   workflow_dispatch:
     inputs:
+      operating-system:
+        required: true
+        description: Compile target x86_64 (Linux only)
+        type: choice
+        options:
+          - aarch64
       version:
         required: true
         description: php version to compile
