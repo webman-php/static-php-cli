@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
@@ -19,7 +19,7 @@ jobs:
         echo "This is a test file" > dist2/1.txt
 
     - name: Deploy to server
-      uses: easingthemes/ssh-deploy@v4.1.8
+      uses: easingthemes/ssh-deploy@v5.1.0
       env:
         SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
         ARGS: "-rltgoDzvO"
