@@ -54,6 +54,8 @@ jobs:
           key: composer-dependencies
 
       # name: Set default extensions
+      - if: inputs.extensions != ''
+        run: echo "extensions=${{ inputs.extensions }}" >> $env:GITHUB_ENV
       - if: inputs.build-cli == true && inputs.extensions == '' && inputs.allextensions == true
         run: echo "extensions=amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,exif,ffi,fileinfo,filter,gd,gmssl,iconv,igbinary,libxml,mbregex,mbstring,msgpack,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,redis,session,shmop,simplexml,soap,sockets,sqlite3,sqlsrv,sysvshm,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
       - if: inputs.build-cli == true && inputs.extensions == '' && inputs.allextensions == false
