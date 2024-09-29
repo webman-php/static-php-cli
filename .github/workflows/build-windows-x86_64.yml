@@ -112,19 +112,14 @@ jobs:
         run: mkdir dist2 && cp buildroot/bin/php.exe dist2/ &&  cd dist2 && tar -zcvf "php-${{ inputs.version }}-windows-x86_64-all-extenstions.tar.gz" ./php.exe && rm ./php.exe
       - if: inputs.build-cli == true && inputs.allextensions == false
         run: mkdir dist2 && cp buildroot/bin/php.exe dist2/ &&  cd dist2 && tar -zcvf "php-${{ inputs.version }}-windows-x86_64.tar.gz" ./php.exe && rm ./php.exe
-        
-      # Deploy to Zhamao Server
-      - if: ${{ inputs.build-cli == true }}
-        uses: easingthemes/ssh-deploy@v5.1.0
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
-          ARGS: "-rltgoDzvO"
-          SOURCE: "dist2/"
-          REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
-          REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
-          REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
-          TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
 
+      # Upload tar
+      - if: ${{ inputs.build-cli == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-${{ inputs.version }}
+          path: dist2
+        
       # Upload micro self-extracted executable
       - if: ${{ inputs.build-micro == true }}
         uses: actions/upload-artifact@v4
