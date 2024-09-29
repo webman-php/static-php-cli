@@ -14,6 +14,10 @@ on:
           - '8.1'
           - '8.0'
           - '7.4'
+      allextensions:
+        description: all extenstions
+        default: true
+        type: boolean
       build-cli:
         description: build cli binary
         default: true
@@ -67,6 +71,15 @@ jobs:
           path: downloads
           key: php-${{ env.INPUT_HASH }}
 
+      # name: Set default extensions
+      - if: inputs.build-cli == true && inputs.extensions == ''
+        run: |
+          if [ "${{ inputs.allextensions }}" == "false" ]; then
+            echo "extensions=session" >> $GITHUB_ENV
+          elif [ "${{ inputs.allextensions }}" == "true" ]; then
+            echo "extensions=session,pdo" >> $GITHUB_ENV
+          fi
+
       # With or without debug
       - if: inputs.debug == true
         run: echo "SPC_BUILD_DEBUG=--debug" >> $env:GITHUB_ENV
@@ -97,7 +110,16 @@ jobs:
 
       # Pack PHP to archive 
       - if: ${{ inputs.build-cli == true }}
-        run: mkdir dist2 && cp buildroot/bin/php.exe dist2/ && cd dist2 && tar -zcvf "php-${{ inputs.version }}-${{ inputs.operating-system }}.tar.gz" ./php.exe && rm ./php.exe
+        run: |
+          mkdir dist2 
+          cp buildroot/bin/php.exe dist2/
+          cd dist2
+          if [ "${{ inputs.allextensions }}" == "true" ]; then
+            tar -zcvf "php-${{ inputs.version }}-windows-x86_64-all-extenstions.tar.gz" ./php.exe
+          else
+            tar -zcvf "php-${{ inputs.version }}-windows-x86_64.tar.gz" ./php.exe
+          fi
+          rm ./php.exe
         
       # Deploy to Zhamao Server
       - if: ${{ inputs.build-cli == true }}
