@@ -44,7 +44,6 @@ jobs:
       - run: |
           brew install automake gzip
           echo "SPC_BUILD_OS=macos" >> $GITHUB_ENV
-
       
       - name: "Setup PHP"
         uses: shivammathur/setup-php@v2
@@ -63,11 +62,10 @@ jobs:
 
       # name: Set default extensions
       - run: echo "extensions-all=amqp,apcu,bcmath,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,gd,gettext,iconv,igbinary,imagick,libxml,mbregex,mbstring,memcached,mongodb,msgpack,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,phar,posix,readline,redis,session,shmop,simplexml,soap,sockets,sodium,sqlite3,sqlsrv,sysvmsg,sysvsem,sysvshm,tokenizer,xlswriter,xml,xmlreader,xmlwriter,xsl,zip,zlib" >> $GITHUB_ENV
-      - run: echo "extensions=apcu,bcmath,calendar,ctype,curl,dba,event,exif,fileinfo,filter,gd,iconv,imagick,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $GITHUB_ENV
+      - run: echo "extensions=bcmath,calendar,ctype,curl,dba,event,exif,fileinfo,filter,gd,iconv,mbstring,mongodb,mysqlnd,openssl,pcntl,pdo,pdo_mysql,phar,posix,readline,redis,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" --with-libs="freetype,libjpeg,libwebp" >> $GITHUB_ENV
 
       # If there's no Composer cache, install dependencies
-      - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
-        run: composer update --no-dev --classmap-authoritative
+      - run: composer update --no-dev --classmap-authoritative
 
       # With or without debug
       - if: inputs.debug == true
@@ -91,13 +89,13 @@ jobs:
       - run: ./bin/spc download --with-php=${{ matrix.version }} --for-extensions=${{ env.extensions-all }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
 
       # Run build command
-      - run: ./bin/spc build ${{ env.extensions }} -I "memory_limit=256M" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
+      - run: ./bin/spc build ${{ env.extensions }} --with-libs="freetype,libjpeg,libwebp" -I "memory_limit=256M" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
 
       # Pack PHP to archive 
       - run: mkdir dist2 && cp buildroot/bin/php dist2/ && cd dist2 && tar -zcvf "php-${{ matrix.version }}-mac-${{ inputs.operating-system }}.tar.gz" ./php && rm ./php
 
       # Run build command
-      - run: ./bin/spc build ${{ env.extensions-all }} -I "memory_limit=256M" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
+      - run: ./bin/spc build ${{ env.extensions-all }} --with-libs="freetype,libjpeg,libwebp" -I "memory_limit=256M" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
 
       # Pack PHP to archive 
       - run: cp buildroot/bin/php dist2/ && cd dist2 && tar -zcvf "php-${{ matrix.version }}-mac-${{ inputs.operating-system }}-all-extension.tar.gz" ./php && rm ./php
