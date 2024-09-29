@@ -27,7 +27,6 @@ on:
         type: boolean
       extensions:
         description: extensions to compile (comma separated)
-        required: true
         type: string
       prefer-pre-built:
         description: prefer pre-built binaries (reduce build time)
