@@ -85,6 +85,8 @@ jobs:
       - run: rm -f downloads/php-*.tar.xz
       - run: rm -rf buildroot  source  locale
 
+      - run: ./bin/spc doctor
+      
       # If there's no dependencies cache, fetch sources, with or without debug
       - run: ./bin/spc download --with-php=${{ matrix.version }} --for-extensions=${{ env.extensions-all }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
 
