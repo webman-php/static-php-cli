@@ -115,7 +115,7 @@ jobs:
         
       # Deploy to Zhamao Server
       - if: ${{ inputs.build-cli == true }}
-        uses: easingthemes/ssh-deploy@v4.1.8
+        uses: easingthemes/ssh-deploy@v5.1.0
         env:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_SECRET_KEY }}
           ARGS: "-rltgoDzvO"
