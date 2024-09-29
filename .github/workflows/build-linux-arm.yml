@@ -20,6 +20,10 @@ on:
           - '8.1'
           - '8.0'
           - '7.4'
+      allextensions:
+        description: build all extenstions
+        default: true
+        type: boolean
       build-cli:
         description: build cli binary
         default: true
@@ -32,7 +36,6 @@ on:
         type: boolean
       extensions:
         description: extensions to compile (comma separated)
-        required: true
         type: string
       prefer-pre-built:
         description: prefer pre-built binaries (reduce build time)
@@ -63,9 +66,17 @@ jobs:
       - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
         run: composer update --no-dev --classmap-authoritative
 
+      # name: Set default extensions
+      - if: inputs.extensions != ''
+        run: echo "extensions=${{ env.extensions }}" >> $env:GITHUB_ENV
+      - if: inputs.build-cli == true && env.extensions == '' && inputs.allextensions == true
+        run: echo "extensions=amqp,apcu,bcmath,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,gd,gettext,iconv,igbinary,imagick,inotify,libxml,mbregex,mbstring,memcache,mongodb,msgpack,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,phar,posix,readline,redis,session,shmop,simplexml,soap,sockets,sodium,sqlite3,sqlsrv,sysvmsg,sysvsem,sysvshm,tokenizer,xlswriter,xml,xmlreader,xmlwriter,xsl,zip,zlib" >> $env:GITHUB_ENV
+      - if: inputs.build-cli == true && env.extensions == '' && inputs.allextensions == false
+        run: echo "extensions=apcu,bcmath,calendar,ctype,curl,dba,event,exif,fileinfo,filter,gd,iconv,imagick,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,sqlite3,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
+
       - name: Generate hashed key for download cache
         run: |
-          INPUT_HASH=$(echo "${{ runner.os }}-${{ inputs.version }}-${{ inputs.extensions }}" | sha256sum | awk '{print $1}')
+          INPUT_HASH=$(echo "${{ runner.os }}-${{ inputs.version }}-${{ env.extensions }}" | sha256sum | awk '{print $1}')
           echo "INPUT_HASH=${INPUT_HASH}" >> $GITHUB_ENV
 
       # Cache downloaded source
@@ -91,10 +102,10 @@ jobs:
 
       # If there's no dependencies cache, fetch sources, with or without debug
       - if: steps.cache-download.outputs.cache-hit != 'true'
-        run: SPC_USE_ARCH=${{ inputs.operating-system }} ./bin/spc-alpine-docker download --with-php=${{ inputs.version }} --for-extensions=${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
+        run: SPC_USE_ARCH=${{ inputs.operating-system }} ./bin/spc-alpine-docker download --with-php=${{ inputs.version }} --for-extensions=${{ env.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
 
       # Run build command
-      - run: SPC_USE_ARCH=${{ inputs.operating-system }} ./bin/spc-alpine-docker build ${{ inputs.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
+      - run: SPC_USE_ARCH=${{ inputs.operating-system }} ./bin/spc-alpine-docker build ${{ env.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
 
       # Upload cli executable
       - if: ${{ inputs.build-cli == true }}
@@ -104,8 +115,10 @@ jobs:
           path: buildroot/bin/php
 
       # Pack PHP to archive 
-      - if: ${{ inputs.build-cli == true }}
-        run: mkdir dist2 && cp buildroot/bin/php dist2/ && cd dist2 && tar -zcvf "php-${{ inputs.version }}-${{ inputs.operating-system }}.tar.gz" ./php && rm ./php
+      - if:  inputs.build-cli == true && inputs.allextensions == true
+        run: mkdir dist2 && cp buildroot/bin/php dist2/ && cd dist2 && tar -zcvf "php-${{ inputs.version }}-linux-arm-all-extensions.tar.gz" ./php && rm ./php
+      - if:  inputs.build-cli == true && inputs.allextensions == false
+        run: mkdir dist2 && cp buildroot/bin/php dist2/ && cd dist2 && tar -zcvf "php-${{ inputs.version }}-linux-arm.tar.gz" ./php && rm ./php
         
       # Deploy to Zhamao Server
       - if: ${{ inputs.build-cli == true }}
