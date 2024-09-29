@@ -94,14 +94,7 @@ jobs:
       - if: inputs.build-cli == true 
         run: mkdir dist2 && cp buildroot/bin/php.exe dist2/ &&  cd dist2 && tar -zcvf "php-${{ inputs.version }}-windows-x86_64.tar.gz" ./php.exe && rm ./php.exe
 
-      # Upload tar
-      - if: ${{ inputs.build-cli == true }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: php-${{ inputs.version }}
-          path: dist2
-
-       # Run build command
+      # Run build command
       - run: ./bin/spc build "${{ env.extensions-all }}" -I "memory_limit=256M" --with-libs="freetype,libavif,libjpeg,libwebp" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
 
       # Pack PHP to archive 
