@@ -41,7 +41,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - run: |
-          brew install automake gzip
           echo "SPC_BUILD_OS=linux" >> $GITHUB_ENV
 
       - name: "Setup PHP"
