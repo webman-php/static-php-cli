@@ -9,17 +9,6 @@ on:
         type: choice
         options:
           - x86_64
-      version:
-        required: true
-        description: php version to compile
-        default: '8.2'
-        type: choice
-        options:
-          - '8.3'
-          - '8.2'
-          - '8.1'
-          - '8.0'
-          - '7.4'
       build-cli:
         description: build cli binary
         default: true
@@ -43,8 +32,11 @@ env:
 
 jobs:
   build:
-    name: build ${{ inputs.version }} on macOS x86_64
+    name: build on macOS x86_64
     runs-on: macos-13
+    strategy:
+      matrix:
+        version: ['8.3', '8.2', '8.1', '8.0']
     steps:
       - uses: actions/checkout@v4
 
@@ -76,18 +68,6 @@ jobs:
       - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
         run: composer update --no-dev --classmap-authoritative
 
-      - name: Generate hashed key for download cache
-        run: |
-          INPUT_HASH=$(echo "${{ runner.os }}-${{ inputs.version }}-${{ env.extensions-all }}" | sha256sum | awk '{print $1}')
-          echo "INPUT_HASH=${INPUT_HASH}" >> $GITHUB_ENV
-
-      # Cache downloaded source
-      - id: cache-download
-        uses: actions/cache@v4
-        with:
-          path: downloads
-          key: php-${{ env.INPUT_HASH }}
-
       # With or without debug
       - if: inputs.debug == true
         run: echo "SPC_BUILD_DEBUG=--debug" >> $GITHUB_ENV
@@ -102,21 +82,24 @@ jobs:
       - if: ${{ inputs.build-fpm == true }}
         run: echo "SPC_BUILD_FPM=--build-fpm" >> $GITHUB_ENV
 
+      # Rm php-src
+      - run: rm -f downloads/php-*.tar.xz
+      - run: rm -rf buildroot  source  locale
+
       # If there's no dependencies cache, fetch sources, with or without debug
-      - if: steps.cache-download.outputs.cache-hit != 'true'
-        run: ./bin/spc download --with-php=${{ inputs.version }} --for-extensions=${{ env.extensions-all }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
+      - run: ./bin/spc download --with-php=${{ matrix.version }} --for-extensions=${{ env.extensions-all }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
 
       # Run build command
       - run: ./bin/spc build ${{ env.extensions }} -I "memory_limit=256M" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
 
       # Pack PHP to archive 
-      - run: mkdir dist2 && cp buildroot/bin/php dist2/ && cd dist2 && tar -zcvf "php-${{ inputs.version }}-mac-${{ inputs.operating-system }}.tar.gz" ./php && rm ./php
+      - run: mkdir dist2 && cp buildroot/bin/php dist2/ && cd dist2 && tar -zcvf "php-${{ matrix.version }}-mac-${{ inputs.operating-system }}.tar.gz" ./php && rm ./php
 
       # Run build command
       - run: ./bin/spc build ${{ env.extensions-all }} -I "memory_limit=256M" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
 
       # Pack PHP to archive 
-      - run: cp buildroot/bin/php dist2/ && cd dist2 && tar -zcvf "php-${{ inputs.version }}-mac-${{ inputs.operating-system }}-all-extension.tar.gz" ./php && rm ./php
+      - run: cp buildroot/bin/php dist2/ && cd dist2 && tar -zcvf "php-${{ matrix.version }}-mac-${{ inputs.operating-system }}-all-extension.tar.gz" ./php && rm ./php
         
       # Deploy to Zhamao Server
       - if: ${{ inputs.build-cli == true }}
@@ -130,29 +113,4 @@ jobs:
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
 
-      # Upload micro self-extracted executable
-      - if: ${{ inputs.build-micro == true }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: micro-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
-          path: buildroot/bin/micro.sfx
-
-      # Upload fpm executable
-      - if: ${{ inputs.build-fpm == true }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: php-fpm-${{ inputs.version }}-${{ env.SPC_BUILD_OS }}
-          path: buildroot/bin/php-fpm
-
-      # Upload extensions metadata
-      - uses: actions/upload-artifact@v4
-        with:
-          name: license-files
-          path: buildroot/license/
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build-meta
-          path: |
-            buildroot/build-extensions.json
-            buildroot/build-libraries.json
 
