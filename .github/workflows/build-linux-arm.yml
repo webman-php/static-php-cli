@@ -117,28 +117,3 @@ jobs:
           REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USER }}
           TARGET: ${{ secrets.DEPLOY_SERVER_TARGET }}
 
-      # Upload micro self-extracted executable
-      - if: ${{ inputs.build-micro == true }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: micro-${{ inputs.version }}-linux-${{ inputs.operating-system }}
-          path: buildroot/bin/micro.sfx
-
-      # Upload fpm executable
-      - if: ${{ inputs.build-fpm == true }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: php-fpm-${{ inputs.version }}-linux-${{ inputs.operating-system }}
-          path: buildroot/bin/php-fpm
-
-      # Upload extensions metadata
-      - uses: actions/upload-artifact@v4
-        with:
-          name: license-files
-          path: buildroot/license/
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build-meta
-          path: |
-            buildroot/build-extensions.json
-            buildroot/build-libraries.json
