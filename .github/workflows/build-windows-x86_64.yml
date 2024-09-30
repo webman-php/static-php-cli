@@ -39,11 +39,8 @@ jobs:
           key: composer-dependencies
 
       # name: Set all extensions
-      - run: echo "extensions-all=amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,exif,ffi,fileinfo,filter,gd,iconv,igbinary,libxml,mbregex,mbstring,msgpack,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,redis,session,shmop,simplexml,soap,sockets,sqlite3,sqlsrv,sysvshm,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
+      - run: echo "extensions=amqp,apcu,bcmath,bz2,calendar,ctype,curl,dba,dom,exif,ffi,fileinfo,filter,gd,iconv,igbinary,libxml,mbregex,mbstring,msgpack,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,pdo_sqlsrv,phar,redis,session,shmop,simplexml,soap,sockets,sqlite3,sqlsrv,sysvshm,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
 
-      # name: Set part extensions
-      - run: echo "extensions=bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,gd,iconv,libxml,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pdo,pdo_mysql,phar,redis,session,simplexml,soap,sockets,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $env:GITHUB_ENV
-      
       # If there's no Composer cache, install dependencies
       - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
         run: composer update --no-dev --classmap-authoritative
@@ -62,12 +59,9 @@ jobs:
 
       - run: ./bin/spc doctor
 
-      # Rm php-src
-      - run: rm downloads/php-*.tar.xz -Force
-      - run: rm buildroot  source  locale -Force
-
       # If there's no dependencies cache, fetch sources, with or without debug
-      - run: ./bin/spc download --with-php="${{ matrix.version }}" --for-extensions="${{ env.extensions-all }}" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
+      - run: ./bin/spc download --with-php="${{ matrix.version }}" --for-extensions="${{ env.extensions }}" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
+      - run: ./bin/spc switch-php-version ${{ matrix.version }}
 
       # Run build command
       - run: ./bin/spc build "${{ env.extensions }}" -I "memory_limit=256M" --with-libs="freetype,libavif,libjpeg,libwebp" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
@@ -75,13 +69,6 @@ jobs:
       # Pack PHP to archive 
       - if: inputs.build-cli == true 
         run: mkdir dist2 && cp buildroot/bin/php.exe dist2/ &&  cd dist2 && tar -zcvf "php-${{ matrix.version }}-windows-x86_64.tar.gz" ./php.exe && rm ./php.exe
-
-      # Run build command
-      - run: ./bin/spc build "${{ env.extensions-all }}" -I "memory_limit=256M" --with-libs="freetype,libavif,libjpeg,libwebp" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
-
-      # Pack PHP to archive 
-      - if: inputs.build-cli == true
-        run: cp buildroot/bin/php.exe dist2/ &&  cd dist2 && tar -zcvf "php-${{ matrix.version }}-windows-x86_64-all-extenstions.tar.gz" ./php.exe && rm ./php.exe
 
       # Upload tar
       - if: ${{ inputs.build-cli == true }}
