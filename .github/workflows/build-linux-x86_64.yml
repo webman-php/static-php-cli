@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['8.3', '8.2']
+        version: ['8.1', '8.0']
     steps:
       - uses: actions/checkout@v4
 
@@ -60,7 +60,7 @@ jobs:
 
       # name: Set default extensions
       - run: echo "extensions-all=amqp,apcu,bcmath,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,gd,gettext,iconv,igbinary,imagick,libxml,mbregex,mbstring,memcache,mongodb,msgpack,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,phar,posix,readline,redis,session,shmop,simplexml,soap,sockets,sodium,sqlite3,sqlsrv,sysvmsg,sysvsem,sysvshm,tokenizer,xlswriter,xml,xmlreader,xmlwriter,xsl,zip,zlib" >> $GITHUB_ENV
-      - run: echo "extensions=bcmath,calendar,ctype,curl,dba,event,exif,fileinfo,filter,gd,iconv,mbstring,mongodb,mysqlnd,openssl,pcntl,pdo,pdo_mysql,phar,posix,readline,redis,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" --with-libs="freetype,libjpeg,libwebp" >> $GITHUB_ENV
+      - run: echo "extensions=bcmath,calendar,ctype,curl,dba,event,exif,fileinfo,filter,gd,iconv,mbstring,mongodb,mysqlnd,openssl,pcntl,pdo,pdo_mysql,phar,posix,readline,redis,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib" >> $GITHUB_ENV
 
 
       # If there's no Composer cache, install dependencies
