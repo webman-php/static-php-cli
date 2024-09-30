@@ -82,7 +82,7 @@ jobs:
         run: echo "SPC_BUILD_FPM=--build-fpm" >> $GITHUB_ENV
 
       # If there's no dependencies cache, fetch sources, with or without debug
-      - run: ./bin/spc download --with-php=${{ matrix.version }} --for-extensions=${{ env.extensions-all }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
+      - run: ./bin/spc download --with-php=${{ matrix.version }} --for-extensions=${{ env.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
       - run: ./bin/spc switch-php-version ${{ matrix.version }}
 
       # Run build command
