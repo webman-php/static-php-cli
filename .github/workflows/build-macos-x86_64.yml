@@ -61,7 +61,7 @@ jobs:
           key: composer-dependencies
 
       # name: Set default extensions
-      - run: echo "extensions=amqp,apcu,bcmath,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,gd,gettext,iconv,igbinary,imagick,libxml,mbregex,mbstring,memcached,mongodb,msgpack,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,phar,posix,readline,redis,session,shmop,simplexml,soap,sockets,sodium,sqlite3,sqlsrv,sysvmsg,sysvsem,sysvshm,tokenizer,xlswriter,xml,xmlreader,xmlwriter,xsl,zip,zlib" >> $GITHUB_ENV
+      - run: echo "extensions=amqp,apcu,bcmath,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,gd,gettext,iconv,igbinary,imagick,libxml,mbregex,mbstring,mongodb,msgpack,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,phar,posix,readline,redis,session,shmop,simplexml,soap,sockets,sodium,sqlite3,sqlsrv,sysvmsg,sysvsem,sysvshm,tokenizer,xlswriter,xml,xmlreader,xmlwriter,xsl,zip,zlib" >> $GITHUB_ENV
 
       # If there's no Composer cache, install dependencies
       - if: steps.cache-composer-deps.outputs.cache-hit != 'true'
@@ -80,6 +80,8 @@ jobs:
         run: echo "SPC_BUILD_MICRO=--build-micro" >> $GITHUB_ENV
       - if: ${{ inputs.build-fpm == true }}
         run: echo "SPC_BUILD_FPM=--build-fpm" >> $GITHUB_ENV
+
+      - run: ./bin/spc doctor
 
       # If there's no dependencies cache, fetch sources, with or without debug
       - run: ./bin/spc download --with-php=${{ matrix.version }} --for-extensions=${{ env.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
