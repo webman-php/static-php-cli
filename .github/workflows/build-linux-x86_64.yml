@@ -91,7 +91,7 @@ jobs:
       # Pack PHP to archive 
       - run: mkdir dist2 && cp buildroot/bin/php dist2/ && cd dist2 && tar -zcvf "php-${{ matrix.version }}-linux-${{ inputs.operating-system }}.tar.gz" ./php && rm ./php
       - if: ${{ inputs.build-micro == true }}
-        run: cp "buildroot/bin/micro.sfx dist2/php${{ matrix.version }}.micro.sfx" && cd dist2 && zip "php${{ matrix.version }}.micro.sfx.zip" "./php${{ matrix.version }}.micro.sfx"
+        run: cp buildroot/bin/micro.sfx dist2/php${{ matrix.version }}.micro.sfx && cd dist2 && zip php${{ matrix.version }}.micro.sfx.zip ./php${{ matrix.version }}.micro.sfx
         
       # Deploy
       - if: ${{ inputs.build-cli == true }}
