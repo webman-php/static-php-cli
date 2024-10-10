@@ -88,7 +88,7 @@ jobs:
       - run: ./bin/spc switch-php-version ${{ matrix.version }}
 
       # Run build command
-      - run: ./bin/spc build ${{ env.extensions }} --with-libs="freetype,libjpeg,libwebp" -I "memory_limit=256M" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
+      - run: ./bin/spc build ${{ env.extensions }} --with-libs="freetype,libjpeg,libwebp" -I "memory_limit=256M" -I "openssl.cafile=/etc/ssl/certs/ca-certificates.crt" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
 
       # Pack PHP to archive 
       - run: mkdir dist2 && cp buildroot/bin/php dist2/ && cd dist2 && tar -zcvf "php-${{ matrix.version }}-mac-${{ inputs.operating-system }}.tar.gz" ./php && rm ./php
