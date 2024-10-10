@@ -72,7 +72,7 @@ jobs:
       - run: SPC_USE_ARCH=${{ inputs.operating-system }} ./bin/spc-alpine-docker download --with-php=${{ matrix.version }} --for-extensions=${{ env.extensions }} ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_PRE_BUILT }}
 
       # Run build command
-      - run: SPC_USE_ARCH=${{ inputs.operating-system }} ./bin/spc-alpine-docker build ${{ env.extensions }} -I "memory_limit=256M" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
+      - run: SPC_USE_ARCH=${{ inputs.operating-system }} ./bin/spc-alpine-docker build ${{ env.extensions }} -I "memory_limit=256M" -I "openssl.cafile=/etc/ssl/certs/ca-certificates.crt" ${{ env.SPC_BUILD_DEBUG }} ${{ env.SPC_BUILD_CLI }} ${{ env.SPC_BUILD_MICRO }} ${{ env.SPC_BUILD_FPM }}
 
       # Pack PHP to archive 
       - run: mkdir dist2 && cp buildroot/bin/php dist2/ && cd dist2 && tar -zcvf "php-${{ matrix.version }}-linux-${{ inputs.operating-system }}.tar.gz" ./php && rm ./php
